@@ -19,15 +19,11 @@
   const fbApp = initializeApp(firebaseConfig);
   const db = getFirestore(fbApp);
 
-  // Expose a small, plain-JS-friendly bridge so the rest of the page
-  // (a regular non-module script) can talk to Firestore.
   window.hlpfDB = {
     async addSubmission(entry){
       await addDoc(collection(db, 'submissions'), entry);
     },
     async deleteSubmission(id){
-      // id here is our own generated id stored as a field, not the
-      // Firestore document id, so we find the matching doc first.
       const snap = await getDocs(collection(db, 'submissions'));
       for(const d of snap.docs){
         if(d.data().id === id){ await deleteDoc(doc(db, 'submissions', d.id)); break; }
@@ -179,7 +175,6 @@ h2.section-head .tag{
   letter-spacing:.05em;
 }
 
-/* ---- overview ---- */
 .overview-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;}
 @media (max-width:720px){.overview-grid{grid-template-columns:1fr;}}
 
@@ -239,7 +234,6 @@ h2.section-head .tag{
 .resource-links a:hover{border-color:var(--magenta); color:var(--magenta-text);}
 .resource-links .desc{display:block;font-size:13px;color:var(--muted);margin-top:2px;}
 
-/* ---- spin wheel ---- */
 .wheel-section{display:flex; gap:32px; flex-wrap:wrap; align-items:center;}
 .wheel-wrap{position:relative; width:220px; height:220px; flex:none;}
 .wheel-pointer{
@@ -276,7 +270,6 @@ h2.section-head .tag{
 .wheel-result .fact{margin-top:10px; font-style:italic; color:var(--muted);}
 .wheel-result b{color:var(--magenta-text);}
 
-/* ---- meeting card ---- */
 .meeting-card{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
 @media (max-width:720px){.meeting-card{grid-template-columns:1fr;}}
 .meeting-when{
@@ -294,7 +287,6 @@ h2.section-head .tag{
 .signup-form{display:flex; flex-direction:column; gap:10px;}
 .signup-count{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-top:8px; display:flex; align-items:center; gap:6px;}
 
-/* ---- form ---- */
 form.submit-form{display:flex;flex-direction:column;gap:14px;}
 .form-row{display:flex;gap:14px;flex-wrap:wrap;}
 .field{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;}
@@ -365,7 +357,6 @@ button:disabled{opacity:.4; cursor:not-allowed;}
 .status-msg.err{color:var(--magenta-text);}
 .status-msg a{color:var(--magenta-text); text-decoration:underline;}
 
-/* ---- wall of voices ---- */
 .wall-meta{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
 .wall-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
 
@@ -421,7 +412,6 @@ button:disabled{opacity:.4; cursor:not-allowed;}
 .note-del{background:none;border:none;color:#bbb;cursor:pointer;font-size:14px;padding:0;line-height:1;}
 .note-del:hover{color:var(--magenta);}
 
-/* ---- pattern finder + drive panels ---- */
 .tool-output{
   margin-top:16px;
   background:rgba(41,171,226,0.07);
@@ -511,7 +501,6 @@ footer{
     </svg>
   </div>
 
-  <!-- OVERVIEW -->
   <section>
     <h2 class="section-head"><span class="tag">01</span> What's actually happening in July?</h2>
     <div class="panel overview-grid">
@@ -540,7 +529,6 @@ footer{
     </div>
   </section>
 
-  <!-- SPIN WHEEL -->
   <section>
     <h2 class="section-head"><span class="tag">02</span> <svg class="icon" width="18" height="18"><use href="#i-sparkle"/></svg> Spin to discover</h2>
     <div class="panel wheel-section">
@@ -564,7 +552,6 @@ footer{
     </div>
   </section>
 
-  <!-- RESOURCES -->
   <section>
     <h2 class="section-head"><span class="tag">03</span> Want to see it for yourself?</h2>
     <div class="panel">
@@ -585,7 +572,6 @@ footer{
     </div>
   </section>
 
-  <!-- MEETING -->
   <section>
     <h2 class="section-head"><span class="tag">04</span> <svg class="icon" width="18" height="18"><use href="#i-mic"/></svg> Let's talk it through</h2>
     <div class="panel meeting-card">
@@ -620,7 +606,6 @@ footer{
     </div>
   </section>
 
-  <!-- FORM -->
   <section>
     <h2 class="section-head"><span class="tag">05</span> <svg class="icon" width="18" height="18"><use href="#i-pencil"/></svg> Add your voice to the wall</h2>
     <div class="panel">
@@ -664,7 +649,6 @@ footer{
     </div>
   </section>
 
-  <!-- WALL -->
   <section>
     <div class="wall-meta">
       <h2 class="section-head" style="margin:0;"><span class="tag">06</span> The wall of voices</h2>
@@ -677,7 +661,6 @@ footer{
     </div>
   </section>
 
-  <!-- PATTERN FINDER -->
   <section>
     <h2 class="section-head"><span class="tag">07</span> <svg class="icon" width="18" height="18"><use href="#i-search"/></svg> Let's find the patterns</h2>
     <div class="panel">
@@ -708,8 +691,8 @@ footer{
 <script>
 const WORD_LIMIT = 100;
 const EMAIL_FOR_LONG_SUBMISSIONS = 'kalifa@wechangeja.com';
-const SUBMISSION_DEADLINE = new Date('2026-07-06T20:00:00-05:00'); // 8pm Jamaica time, same as the meeting
-const MEETING_START_UTC = '20260707T010000Z'; // Jul 6, 8pm Jamaica (UTC-5) = Jul 7, 1am UTC
+const SUBMISSION_DEADLINE = new Date('2026-07-06T20:00:00-05:00');
+const MEETING_START_UTC = '20260707T010000Z';
 const MEETING_END_UTC = '20260707T020000Z';
 
 const SDG_LABELS = {
@@ -734,7 +717,8 @@ const SDG_FACTS = {
 
 let submissions = [];
 let signupCount = 0;
-const recentlyAdded = new Map(); // id -> entry, kept until confirmed present from the database
+let lastLoadError = null;
+const recentlyAdded = new Map();
 
 function hashRotation(id){
   let h = 0;
@@ -746,8 +730,6 @@ function countWords(text){
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
-// The Firebase SDK loads as a module and may not be ready the instant
-// this script runs, so wait for it if needed.
 function waitForDB(){
   return new Promise((resolve)=>{
     if(window.hlpfDBReady){ resolve(); return; }
@@ -775,15 +757,13 @@ async function removeSubmission(id){
   await window.hlpfDB.deleteSubmission(id);
 }
 
-// After saving, actually re-check the database a few times to confirm
-// it's really there — rather than just trusting the write succeeded.
 async function verifySubmissionSaved(id, attempts=4, delayMs=1200){
   for(let i=0;i<attempts;i++){
     await new Promise(r=>setTimeout(r, delayMs));
     try{
       const data = await fetchFreshData();
       if((data.submissions||[]).some(s=>s.id===id)) return true;
-    }catch(e){ /* try again next loop */ }
+    }catch(e){}
   }
   return false;
 }
@@ -824,26 +804,23 @@ async function loadData(){
       date: Number(s.date)
     }));
 
-    // Anything the server now confirms can stop being "pending".
     const serverIds = new Set(serverSubmissions.map(s => s.id));
     for(const id of Array.from(recentlyAdded.keys())){
       if(serverIds.has(id)) recentlyAdded.delete(id);
     }
-    // Merge: server's confirmed list, plus anything still pending locally
-    // that the server hasn't caught up on yet — so a note never vanishes
-    // just because one background check ran ahead of the sheet.
     const merged = [...serverSubmissions];
     for(const entry of recentlyAdded.values()){
       if(!serverIds.has(entry.id)) merged.push(entry);
     }
     submissions = merged;
     signupCount = Number(data.signupCount) || 0;
+    lastLoadError = null;
     renderWall();
     renderSignupCount();
   }catch(e){
-    // A failed refresh should never erase what's already on screen —
-    // just skip this round and try again next time.
-    console.warn('Could not refresh from the sheet, keeping what was already showing:', e);
+    console.warn('Could not load submissions:', e);
+    lastLoadError = (e && e.message) ? e.message : String(e);
+    if(submissions.length === 0) renderWall();
   }
 }
 
@@ -858,7 +835,11 @@ function renderWall(){
   const count = document.getElementById('wallCount');
   count.textContent = submissions.length + (submissions.length===1?' submission':' submissions');
   if(submissions.length===0){
-    wall.innerHTML = '<div class="empty-wall"><svg class="icon" width="20" height="20"><use href="#i-eye"/></svg> No voices pinned yet — yours could be the first</div>';
+    if(lastLoadError){
+      wall.innerHTML = '<div class="empty-wall"><svg class="icon" width="20" height="20"><use href="#i-pin"/></svg> Could not load the wall right now — ' + escapeHtml(lastLoadError) + '. Try refreshing the page.</div>';
+    } else {
+      wall.innerHTML = '<div class="empty-wall"><svg class="icon" width="20" height="20"><use href="#i-eye"/></svg> No voices pinned yet — yours could be the first</div>';
+    }
     return;
   }
   const sorted = [...submissions].sort((a,b)=> b.date - a.date);
@@ -900,7 +881,6 @@ function renderWall(){
   });
 }
 
-// ---- Word counter ----
 const textInput = document.getElementById('textInput');
 const wordCounter = document.getElementById('wordCounter');
 textInput.addEventListener('input', ()=>{
@@ -909,7 +889,6 @@ textInput.addEventListener('input', ()=>{
   wordCounter.className = 'word-counter' + (n > WORD_LIMIT ? ' over' : n > WORD_LIMIT*0.8 ? ' warn' : '');
 });
 
-// ---- Submission deadline ----
 function isClosed(){
   return new Date() >= SUBMISSION_DEADLINE;
 }
@@ -972,19 +951,11 @@ document.getElementById('submitForm').addEventListener('submit', async (e)=>{
   statusEl.className = 'status-msg';
   try{
     await saveSubmission({id:entry.id, name:entry.name, org:entry.org, anonymous:entry.anonymous, sdg:entry.sdg, text:entry.text, date:entry.date});
-    const confirmed = await verifySubmissionSaved(entry.id);
-    if(confirmed){
-      statusEl.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-check"/></svg> Pinned to the wall. Thank you for your voice.';
-      statusEl.className = 'status-msg ok';
-      document.getElementById('submitForm').reset();
-      wordCounter.textContent = '0 / ' + WORD_LIMIT + ' words';
-      wordCounter.className = 'word-counter';
-    } else {
-      // Keep it visible (recentlyAdded protects it from being wiped by
-      // the background refresh) but be honest that we couldn't confirm it.
-      statusEl.textContent = "Sent — but we couldn't confirm it saved yet. It'll stay visible here; please check back in a minute, or try again if it's gone.";
-      statusEl.className = 'status-msg err';
-    }
+    statusEl.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-check"/></svg> Pinned to the wall. Thank you for your voice.';
+    statusEl.className = 'status-msg ok';
+    document.getElementById('submitForm').reset();
+    wordCounter.textContent = '0 / ' + WORD_LIMIT + ' words';
+    wordCounter.className = 'word-counter';
   }catch(err){
     submissions = submissions.filter(s => s.id !== entry.id);
     recentlyAdded.delete(entry.id);
@@ -995,7 +966,6 @@ document.getElementById('submitForm').addEventListener('submit', async (e)=>{
   }
 });
 
-// ---- SDG chip explanations ----
 document.querySelectorAll('.sdg-chip').forEach(chip=>{
   chip.addEventListener('click', ()=>{
     const key = chip.getAttribute('data-sdg');
@@ -1012,7 +982,6 @@ document.querySelectorAll('.sdg-chip').forEach(chip=>{
   });
 });
 
-// ---- Spin the wheel ----
 const SDG_ORDER = ['sdg6','sdg7','sdg9','sdg11','sdg17'];
 let wheelRotation = 0;
 document.getElementById('spinBtn').addEventListener('click', ()=>{
@@ -1044,7 +1013,6 @@ document.getElementById('spinBtn').addEventListener('click', ()=>{
   }, 3050);
 });
 
-// ---- HLPF countdown (live) ----
 function updateCountdown(){
   const el = document.getElementById('countdown');
   const start = new Date('2026-07-07T00:00:00Z');
@@ -1063,7 +1031,6 @@ function updateCountdown(){
   }
 }
 
-// ---- Add to calendar ----
 document.getElementById('calendarBtn').addEventListener('click', ()=>{
   const text = encodeURIComponent("WE-Change JA VNR 2026 Community Consultation");
   const details = encodeURIComponent("We'll walk through Jamaica's official update to the UN ahead of the 2026 HLPF, and make sure the voices on the Youth Voices wall get carried into the room.\n\nJoin: https://meet.google.com/vic-njkk-bst\nPhone: (US) +1 913-298-1113, PIN: 414 080 123#\nMore numbers: https://tel.meet/vic-njkk-bst?pin=2837431237995");
@@ -1072,7 +1039,6 @@ document.getElementById('calendarBtn').addEventListener('click', ()=>{
   window.open(url, '_blank');
 });
 
-// ---- Meeting signup ----
 function renderSignupCount(){
   const el = document.getElementById('signupCount');
   if(signupCount === 0){
@@ -1095,24 +1061,17 @@ document.getElementById('signupForm').addEventListener('submit', async (e)=>{
   statusEl.className = 'status-msg';
   try{
     await saveSignup({name, email, date: Date.now()});
-    const confirmedCount = await verifySignupSaved(signupCount);
-    if(confirmedCount !== null){
-      signupCount = confirmedCount;
-      renderSignupCount();
-      statusEl.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-check"/></svg> You\'re on the list — see you there!';
-      statusEl.className = 'status-msg ok';
-      document.getElementById('signupForm').reset();
-    } else {
-      statusEl.textContent = "Sent — but we couldn't confirm it yet. Please check back shortly, or try again if needed.";
-      statusEl.className = 'status-msg err';
-    }
+    signupCount += 1;
+    renderSignupCount();
+    statusEl.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-check"/></svg> You\'re on the list — see you there!';
+    statusEl.className = 'status-msg ok';
+    document.getElementById('signupForm').reset();
   }catch(err){
     statusEl.textContent = 'Could not save — please try again.';
     statusEl.className = 'status-msg err';
   }
 });
 
-// ---- Pattern finder ----
 async function askTheWall(prompt){
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
@@ -1211,7 +1170,7 @@ updateDeadlinePill();
 setInterval(updateCountdown, 60*1000);
 setInterval(updateDeadlinePill, 60*1000);
 loadData();
-setInterval(loadData, 30*1000); // pick up new submissions from other visitors
+setInterval(loadData, 30*1000);
 </script>
 
 </body>
