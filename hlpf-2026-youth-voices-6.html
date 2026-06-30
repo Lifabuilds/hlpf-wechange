@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Our Stories for the 2026 HLPF — WE-Change Jamaica</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAxQk_eMotfgpWbS6nm8acZTQH5BOAxwxc",
+    authDomain: "hlpf-2026-wechange-ja.firebaseapp.com",
+    projectId: "hlpf-2026-wechange-ja",
+    storageBucket: "hlpf-2026-wechange-ja.firebasestorage.app",
+    messagingSenderId: "764478966266",
+    appId: "1:764478966266:web:2d4d23599e28691d2a3c43"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getFirestore(fbApp);
+
+  // Expose a small, plain-JS-friendly bridge so the rest of the page
+  // (a regular non-module script) can talk to Firestore.
+  window.hlpfDB = {
+    async addSubmission(entry){
+      await addDoc(collection(db, 'submissions'), entry);
+    },
+    async deleteSubmission(id){
+      // id here is our own generated id stored as a field, not the
+      // Firestore document id, so we find the matching doc first.
+      const snap = await getDocs(collection(db, 'submissions'));
+      for(const d of snap.docs){
+        if(d.data().id === id){ await deleteDoc(doc(db, 'submissions', d.id)); break; }
+      }
+    },
+    async addSignup(entry){
+      await addDoc(collection(db, 'signups'), entry);
+    },
+    async getAll(){
+      const snap = await getDocs(collection(db, 'submissions'));
+      const submissions = snap.docs.map(d => d.data());
+      const signupsSnap = await getDocs(collection(db, 'signups'));
+      return { submissions, signupCount: signupsSnap.size };
+    }
+  };
+  window.hlpfDBReady = true;
+  window.dispatchEvent(new Event('hlpfDBReady'));
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root{
+  --bg:#070707;
+  --surface:#141414;
+  --ink:#F3F1EC;
+  --magenta:#C5168D;
+  --magenta-text:#FF5FB0;
+  --blue:#29ABE2;
+  --gold:#F2B705;
+  --line: rgba(255,255,255,0.12);
+  --muted: rgba(243,241,236,0.6);
+
+  --sdg6:#29ABE2;
+  --sdg7:#F2B705;
+  --sdg9:#8A3FA0;
+  --sdg11:#C5168D;
+  --sdg17:#4A57C9;
+  --sdgOther:#8A7E72;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background: var(--bg);
+  color: var(--ink);
+  font-family:'Work Sans', sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+.icon{
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vertical-align:-3px;
+  flex:none;
+}
+
+.wrap{max-width:1080px;margin:0 auto;padding:36px 24px 80px;}
+
+.hero-row{display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap;}
+.hero-text{flex:1 1 420px;}
+
+.logo-motif{flex:none; animation: spin 26s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+.eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--magenta-text);
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:14px;
+}
+.eyebrow::before{content:"";width:8px;height:8px;background:var(--gold);border-radius:50%;display:inline-block;flex:none;}
+
+h1.title{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size:clamp(34px,5.8vw,60px);
+  line-height:1.06;
+  letter-spacing:-.01em;
+  margin:0 0 14px;
+  color:var(--ink);
+}
+h1.title em{
+  font-style:italic;
+  font-weight:500;
+  color:var(--magenta-text);
+}
+
+.subtitle{
+  max-width:560px;
+  font-size:17px;
+  color:rgba(243,241,236,0.78);
+  margin:0 0 28px;
+}
+
+.countdown{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  color:#7fd4ec;
+  border:1px solid rgba(41,171,226,0.35);
+  background:rgba(41,171,226,0.08);
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 14px;
+  border-radius:20px;
+  margin-bottom:36px;
+}
+.countdown .num{font-size:16px;color:var(--ink);font-weight:700;}
+.countdown .pulse{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 1.4s infinite ease-in-out;flex:none;}
+@keyframes pulse{0%,100%{opacity:.35;}50%{opacity:1;}}
+
+section{margin-bottom:46px;}
+
+.panel{
+  background: var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:26px 28px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+
+h2.section-head{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:22px;
+  letter-spacing:-.005em;
+  margin:0 0 16px;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+h2.section-head .tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:#fff;
+  background:var(--magenta);
+  padding:3px 8px;
+  border-radius:20px;
+  letter-spacing:.05em;
+}
+
+/* ---- overview ---- */
+.overview-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;}
+@media (max-width:720px){.overview-grid{grid-template-columns:1fr;}}
+
+.fact-list{list-style:none;margin:0 0 18px;padding:0;font-size:14.5px;}
+.fact-list li{
+  display:grid; grid-template-columns:90px 1fr; gap:10px;
+  padding:9px 0; border-bottom:1px dashed var(--line);
+}
+.fact-list li:last-child{border-bottom:none;}
+.fact-list .k{font-family:'JetBrains Mono',monospace;color:var(--magenta-text);font-size:12px;text-transform:uppercase;letter-spacing:.04em;}
+
+.sdg-hint{font-size:12.5px;color:var(--muted);margin:14px 0 8px;}
+.sdg-row{display:flex;flex-wrap:wrap;gap:8px;}
+.sdg-chip{
+  font-family:'Work Sans', sans-serif;
+  font-size:13px;
+  font-weight:600;
+  padding:8px 14px;
+  border-radius:20px;
+  color:#fff;
+  white-space:nowrap;
+  border:none;
+  cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:transform .18s ease, box-shadow .2s ease;
+}
+.sdg-chip[data-sdg="sdg7"]{color:#3a2a00;}
+.sdg-chip:hover{transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,0.4);}
+.sdg-chip.active{box-shadow:0 0 0 3px var(--surface), 0 0 0 5px currentColor;}
+
+.sdg-explain{
+  margin-top:14px;
+  padding:14px 16px;
+  border-radius:10px;
+  background:rgba(41,171,226,0.08);
+  border:1px solid var(--line);
+  font-size:14px;
+  color:rgba(243,241,236,0.88);
+  display:none;
+}
+.sdg-explain.show{display:block;}
+.sdg-explain b{color:var(--magenta-text);}
+
+.context-box{font-size:14.5px; color:rgba(243,241,236,0.82);}
+.context-box strong{color:var(--ink);}
+
+.resource-links{list-style:none;margin:0;padding:0;}
+.resource-links li{margin-bottom:12px;}
+.resource-links a{
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:1px solid var(--blue);
+  font-weight:600;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:border-color .15s, color .15s;
+}
+.resource-links a:hover{border-color:var(--magenta); color:var(--magenta-text);}
+.resource-links .desc{display:block;font-size:13px;color:var(--muted);margin-top:2px;}
+
+/* ---- spin wheel ---- */
+.wheel-section{display:flex; gap:32px; flex-wrap:wrap; align-items:center;}
+.wheel-wrap{position:relative; width:220px; height:220px; flex:none;}
+.wheel-pointer{
+  position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+  width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;
+  border-top:16px solid var(--ink); z-index:3;
+}
+.wheel{
+  position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(from 0deg, var(--sdg6) 0deg 72deg, var(--sdg7) 72deg 144deg, var(--sdg9) 144deg 216deg, var(--sdg11) 216deg 288deg, var(--sdg17) 288deg 360deg);
+  border:4px solid var(--bg);
+  box-shadow:0 0 0 2px var(--line), 0 14px 30px rgba(0,0,0,0.6);
+  transition: transform 3s cubic-bezier(.13,.74,.1,1);
+  transform: rotate(0deg);
+}
+.wheel-hub{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:54px;height:54px;border-radius:50%;
+  background:var(--bg); border:3px solid var(--surface);
+  display:flex; align-items:center; justify-content:center; z-index:2;
+  color:var(--gold);
+}
+.wheel-side{flex:1 1 280px;}
+.wheel-legend{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 18px;}
+.legend-item{display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
+.legend-dot{width:10px;height:10px;border-radius:50%; flex:none;}
+
+.wheel-result{
+  margin-top:6px; padding:16px 18px; border-radius:10px;
+  background:rgba(255,255,255,0.03); border:1px solid var(--line);
+  font-size:14px; color:rgba(243,241,236,0.9); display:none;
+}
+.wheel-result.show{display:block;}
+.wheel-result .fact{margin-top:10px; font-style:italic; color:var(--muted);}
+.wheel-result b{color:var(--magenta-text);}
+
+/* ---- meeting card ---- */
+.meeting-card{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+@media (max-width:720px){.meeting-card{grid-template-columns:1fr;}}
+.meeting-when{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  background:rgba(197,22,141,0.1);
+  border:1px solid rgba(197,22,141,0.3);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-top:12px;
+  color:var(--ink);
+  line-height:2;
+}
+.meeting-when b{color:var(--magenta-text);}
+.signup-form{display:flex; flex-direction:column; gap:10px;}
+.signup-count{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-top:8px; display:flex; align-items:center; gap:6px;}
+
+/* ---- form ---- */
+form.submit-form{display:flex;flex-direction:column;gap:14px;}
+.form-row{display:flex;gap:14px;flex-wrap:wrap;}
+.field{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;}
+label{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+input[type=text], input[type=email], input[type=password], select, textarea{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:11px 13px;
+  color:var(--ink);
+  font-family:'Work Sans',sans-serif;
+  font-size:15px;
+  resize:vertical;
+}
+input:focus, select:focus, textarea:focus{
+  outline:2px solid var(--blue); outline-offset:1px; border-color:transparent;
+}
+textarea{min-height:120px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13.5px;color:rgba(243,241,236,0.72);}
+.checkbox-row input{accent-color:var(--magenta);}
+
+.word-counter{font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted); text-align:right;}
+.word-counter.warn{color:var(--gold);}
+.word-counter.over{color:var(--magenta-text); font-weight:600;}
+
+.deadline-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  background:rgba(242,183,5,0.1); border:1px solid rgba(242,183,5,0.35);
+  color:var(--gold); padding:6px 12px; border-radius:20px; margin-bottom:16px;
+}
+
+button{
+  font-family:'Work Sans', sans-serif;
+  text-transform:none;
+  letter-spacing:.01em;
+  font-size:14.5px;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+  border-radius:11px;
+  padding:13px 24px;
+  display:inline-flex; align-items:center; gap:9px;
+  transition:transform .18s ease, opacity .15s, background .2s ease, box-shadow .25s ease;
+}
+button:active{transform:scale(0.97);}
+button:disabled{opacity:.4; cursor:not-allowed;}
+
+.btn-primary{
+  background:linear-gradient(135deg, #d41e9c, #9c0f6c);
+  color:#fff;
+  box-shadow:0 4px 16px rgba(197,22,141,0.28);
+}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 8px 22px rgba(197,22,141,0.4);}
+.btn-secondary{background:rgba(255,255,255,0.03); color:var(--ink); border:1px solid var(--line);}
+.btn-secondary:hover:not(:disabled){border-color:var(--blue); background:rgba(41,171,226,0.07); color:#9fdcf0; transform:translateY(-1px);}
+.btn-gold{
+  background:linear-gradient(135deg, #f7c52e, #d99e00);
+  color:#3a2a00;
+  box-shadow:0 4px 16px rgba(242,183,5,0.25);
+}
+.btn-gold:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 8px 22px rgba(242,183,5,0.38);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-size:12.5px;padding:9px 14px;}
+.btn-ghost:hover{color:var(--magenta-text);border-color:var(--magenta);}
+
+.status-msg{font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:4px;min-height:16px;display:flex;align-items:center;gap:6px;}
+.status-msg.ok{color:#43d18a;}
+.status-msg.err{color:var(--magenta-text);}
+.status-msg a{color:var(--magenta-text); text-decoration:underline;}
+
+/* ---- wall of voices ---- */
+.wall-meta{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+.wall-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+
+.board-bg{
+  background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1.4px);
+  background-size:22px 22px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:30px;
+}
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:24px 20px;}
+.empty-wall{
+  font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);
+  text-align:center; padding:40px 10px; grid-column:1/-1;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+
+.note{
+  background:#FBF1E4;
+  color:#1c1c1c;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,0.06);
+  border-top:5px solid #ccc;
+  padding:18px 16px 16px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.5);
+  position:relative;
+  font-size:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transition:transform .15s;
+}
+.note:hover{transform:translateY(-3px);}
+.note-tag{
+  align-self:flex-start;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:.04em;
+  color:#fff;
+  padding:3px 9px;
+  border-radius:20px;
+  text-transform:uppercase;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.note-tag.tag-sdg7{color:#3a2a00;}
+.note-text{flex:1; white-space:pre-wrap; line-height:1.45;}
+.note-org{font-size:12px;color:#6b5d4a;font-style:italic;}
+.note-foot{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:#6b5d4a;
+  border-top:1px dashed rgba(0,0,0,0.15); padding-top:8px;
+}
+.note-del{background:none;border:none;color:#bbb;cursor:pointer;font-size:14px;padding:0;line-height:1;}
+.note-del:hover{color:var(--magenta);}
+
+/* ---- pattern finder + drive panels ---- */
+.tool-output{
+  margin-top:16px;
+  background:rgba(41,171,226,0.07);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px 18px;
+  font-size:14px;
+  white-space:pre-wrap;
+  color:rgba(243,241,236,0.92);
+  display:none;
+}
+.tool-output.show{display:block;}
+.loader{
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);
+  display:none; align-items:center; gap:8px; margin-top:10px;
+}
+.loader.show{display:flex;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse2 1s infinite ease-in-out;}
+.dot:nth-child(2){animation-delay:.15s;}
+.dot:nth-child(3){animation-delay:.3s;}
+@keyframes pulse2{0%,100%{opacity:.25;}50%{opacity:1;}}
+
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+
+.locked-note{font-size:13px;color:var(--muted);margin-top:10px;}
+
+footer{
+  margin-top:50px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;
+  color:var(--muted);
+  line-height:1.6;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important;}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+<defs>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="12" x2="12" y2="7"/><line x1="12" y1="12" x2="16" y2="14"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></symbol>
+<symbol id="i-thumbtack" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><line x1="12" y1="12" x2="12" y2="21"/></symbol>
+<symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 2c4 5 7 8.5 7 12a7 7 0 0 1-14 0c0-3.5 3-7 7-12z"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-2 8 11-12h-7z"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><rect x="7" y="7" width="2" height="2"/><rect x="11" y="7" width="2" height="2"/><rect x="15" y="7" width="2" height="2"/><rect x="7" y="12" width="2" height="2"/><rect x="11" y="12" width="2" height="2"/><rect x="15" y="12" width="2" height="2"/></symbol>
+<symbol id="i-city" viewBox="0 0 24 24"><rect x="3" y="10" width="7" height="11"/><rect x="14" y="4" width="7" height="17"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M9 15l6-6"/><path d="M8 12l-2 2a3 3 0 0 0 4 4l2-2"/><path d="M16 12l2-2a3 3 0 0 0-4-4l-2 2"/></symbol>
+<symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M7 2h10v4l-4 6 4 6v4H7v-4l4-6-4-6V2z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-userplus" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M3 21l4-1 11-11-3-3L4 17l-1 4z"/><line x1="14" y1="4" x2="17" y2="7"/></symbol>
+<symbol id="i-rotate" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></symbol>
+</defs>
+</svg>
+
+<div class="wrap">
+
+  <div class="hero-row">
+    <div class="hero-text">
+      <div class="eyebrow">WE-Change Jamaica · Youth Voices Project</div>
+      <h1 class="title">Our Stories<br>for the <em>2026 HLPF</em></h1>
+      <p class="subtitle">A space for young feminists across Jamaica to share what's really happening in our communities — before world leaders meet in New York this July. Your name, your words, your call.</p>
+      <div class="countdown" id="countdown"><span class="pulse"></span> Loading…</div>
+    </div>
+    <svg class="logo-motif" viewBox="0 0 200 200" width="90" height="90" aria-hidden="true">
+      <defs>
+        <mask id="biteGold"><rect width="200" height="200" fill="white"/><circle cx="128" cy="100" r="52" fill="black"/></mask>
+        <mask id="biteBlue"><rect width="200" height="200" fill="white"/><circle cx="138" cy="100" r="68" fill="black"/></mask>
+        <mask id="biteMagenta"><rect width="200" height="200" fill="white"/><circle cx="148" cy="100" r="84" fill="black"/></mask>
+      </defs>
+      <circle cx="68" cy="100" r="52" fill="var(--gold)" mask="url(#biteGold)"/>
+      <circle cx="83" cy="100" r="68" fill="var(--blue)" mask="url(#biteBlue)"/>
+      <circle cx="98" cy="100" r="84" fill="var(--magenta)" mask="url(#biteMagenta)"/>
+    </svg>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section>
+    <h2 class="section-head"><span class="tag">01</span> What's actually happening in July?</h2>
+    <div class="panel overview-grid">
+      <div class="context-box">
+        <p>Every July, leaders from around the world meet at the United Nations in New York to check in on some big global promises — clean water, reliable power, safer cities, and fair partnerships between richer and poorer countries. This meeting is called the <strong>HLPF</strong> (just think "the big check-in").</p>
+        <p>This year, it runs <strong>July 7–15</strong>. <strong>Jamaica is one of the countries giving an official update</strong> on how it's doing — this is the third time we've done this.</p>
+        <p>Official updates can sound very polished. This page exists so what's actually happening in our communities — the parts that don't always make it into the official version — gets said too, in our own words.</p>
+      </div>
+      <div>
+        <ul class="fact-list">
+          <li><span class="k">When</span><span>Jul 7–15, 2026</span></li>
+          <li><span class="k">Where</span><span>New York, USA</span></li>
+          <li><span class="k">Jamaica</span><span>Giving its 3rd update</span></li>
+          <li><span class="k">Region</span><span>Latin America &amp; Caribbean</span></li>
+        </ul>
+        <p class="sdg-hint">Tap a topic to see what it's really about ↓</p>
+        <div class="sdg-row" id="sdgRow">
+          <button class="sdg-chip" data-sdg="sdg6" style="background:var(--sdg6)"><svg class="icon" width="13" height="13"><use href="#i-droplet"/></svg> Water</button>
+          <button class="sdg-chip" data-sdg="sdg7" style="background:var(--sdg7)"><svg class="icon" width="13" height="13"><use href="#i-zap"/></svg> Energy</button>
+          <button class="sdg-chip" data-sdg="sdg9" style="background:var(--sdg9)"><svg class="icon" width="13" height="13"><use href="#i-building"/></svg> Infrastructure</button>
+          <button class="sdg-chip" data-sdg="sdg11" style="background:var(--sdg11)"><svg class="icon" width="13" height="13"><use href="#i-city"/></svg> Cities</button>
+          <button class="sdg-chip" data-sdg="sdg17" style="background:var(--sdg17)"><svg class="icon" width="13" height="13"><use href="#i-link"/></svg> Partnerships</button>
+        </div>
+        <div class="sdg-explain" id="sdgExplain"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPIN WHEEL -->
+  <section>
+    <h2 class="section-head"><span class="tag">02</span> <svg class="icon" width="18" height="18"><use href="#i-sparkle"/></svg> Spin to discover</h2>
+    <div class="panel wheel-section">
+      <div class="wheel-wrap">
+        <div class="wheel-pointer"></div>
+        <div class="wheel" id="sdgWheel"></div>
+        <div class="wheel-hub"><svg class="icon" width="22" height="22"><use href="#i-rotate"/></svg></div>
+      </div>
+      <div class="wheel-side">
+        <p class="context-box" style="margin-top:0;">Not sure what to write about yet? Give it a spin — land on a topic, see what it actually means, and get a quick fact about it in a Caribbean context.</p>
+        <div class="wheel-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:var(--sdg6)"></span> Water</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--sdg7)"></span> Energy</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--sdg9)"></span> Infrastructure</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--sdg11)"></span> Cities</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--sdg17)"></span> Partnerships</span>
+        </div>
+        <button class="btn-gold" id="spinBtn"><svg class="icon" width="14" height="14"><use href="#i-rotate"/></svg> Spin for a topic</button>
+        <div class="wheel-result" id="wheelResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section>
+    <h2 class="section-head"><span class="tag">03</span> Want to see it for yourself?</h2>
+    <div class="panel">
+      <ul class="resource-links">
+        <li>
+          <a href="https://hlpf.un.org/2026" target="_blank" rel="noopener">The official HLPF 2026 page →</a>
+          <span class="desc">The full schedule, and how anyone can get involved.</span>
+        </li>
+        <li>
+          <a href="https://hlpf.un.org/vnrs" target="_blank" rel="noopener">Jamaica's official update, alongside everyone else's →</a>
+          <span class="desc">See how Jamaica's update compares to the other 35 countries presenting this year.</span>
+        </li>
+        <li>
+          <a href="https://www.un.int/jamaica" target="_blank" rel="noopener">Jamaica's team at the UN →</a>
+          <span class="desc">Past statements from Jamaica's official representatives.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- MEETING -->
+  <section>
+    <h2 class="section-head"><span class="tag">04</span> <svg class="icon" width="18" height="18"><use href="#i-mic"/></svg> Let's talk it through</h2>
+    <div class="panel meeting-card">
+      <div>
+        <p class="context-box" style="margin-top:0;">Before anyone gets on a plane, the WE-Change team is hopping on a call — the <strong>VNR 2026 Community Consultation</strong> — to walk through Jamaica's official update to the UN, and make sure everything pinned to this wall actually gets carried into the room.</p>
+        <div class="meeting-when">
+          <svg class="icon" width="14" height="14"><use href="#i-calendar"/></svg> <b>Monday, July 6</b><br>
+          <svg class="icon" width="14" height="14"><use href="#i-clock"/></svg> <b>8:00 – 9:00 PM</b> Jamaica time<br>
+          <svg class="icon" width="14" height="14"><use href="#i-pin"/></svg> Google Meet — link below
+        </div>
+        <div class="btn-row">
+          <a href="https://meet.google.com/vic-njkk-bst" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;"><svg class="icon" width="14" height="14"><use href="#i-mic"/></svg> Join the call</a>
+          <button class="btn-gold" id="calendarBtn"><svg class="icon" width="14" height="14"><use href="#i-calendar"/></svg> Add to calendar</button>
+        </div>
+        <p class="locked-note" style="margin-top:10px;">Dialing in instead? Call (US) +1 913-298-1113, PIN: 414 080 123#. <a href="https://tel.meet/vic-njkk-bst?pin=2837431237995" target="_blank" rel="noopener" style="color:var(--blue);">More phone numbers →</a></p>
+      </div>
+      <div>
+        <form class="signup-form" id="signupForm">
+          <div class="field">
+            <label for="signupName">Your name</label>
+            <input type="text" id="signupName" placeholder="e.g. Tanisha Brown" required>
+          </div>
+          <div class="field">
+            <label for="signupEmail">Your email</label>
+            <input type="email" id="signupEmail" placeholder="you@example.com" required>
+          </div>
+          <button type="submit" class="btn-primary"><svg class="icon" width="14" height="14"><use href="#i-userplus"/></svg> I'm coming</button>
+          <span class="status-msg" id="signupStatus"></span>
+        </form>
+        <div class="signup-count" id="signupCount"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <section>
+    <h2 class="section-head"><span class="tag">05</span> <svg class="icon" width="18" height="18"><use href="#i-pencil"/></svg> Add your voice to the wall</h2>
+    <div class="panel">
+      <div class="deadline-pill" id="deadlinePill"><svg class="icon" width="13" height="13"><use href="#i-hourglass"/></svg> Loading…</div>
+      <form class="submit-form" id="submitForm">
+        <div class="form-row">
+          <div class="field">
+            <label for="nameInput">Your name</label>
+            <input type="text" id="nameInput" placeholder="e.g. Tanisha Brown">
+          </div>
+          <div class="field">
+            <label for="orgInput">Organization you represent (optional)</label>
+            <input type="text" id="orgInput" placeholder="e.g. Campus Elite Jamaica">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="sdgInput">This is mostly about</label>
+            <select id="sdgInput">
+              <option value="sdgOther">A bit of everything / something else</option>
+              <option value="sdg6">Water</option>
+              <option value="sdg7">Energy</option>
+              <option value="sdg9">Infrastructure</option>
+              <option value="sdg11">Cities</option>
+              <option value="sdg17">Partnerships</option>
+            </select>
+          </div>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" id="anonCheck"> Post without my name</label>
+        <label class="checkbox-row"><input type="checkbox" id="consentCheck"> I understand WE-Change Jamaica may summarize or quote my submission for advocacy purposes. My name and location won't be shared publicly unless I've chosen to include them above.</label>
+        <div class="field">
+          <label for="textInput">What do you want people to know? (about 100 words)</label>
+          <textarea id="textInput" placeholder="What's really going on in your community? What's missing from the official story?"></textarea>
+          <div class="word-counter" id="wordCounter">0 / 100 words</div>
+        </div>
+        <div class="form-row" style="align-items:center;">
+          <button type="submit" class="btn-primary" id="submitBtn"><svg class="icon" width="14" height="14"><use href="#i-thumbtack"/></svg> Pin my voice to the wall</button>
+          <span class="status-msg" id="formStatus"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- WALL -->
+  <section>
+    <div class="wall-meta">
+      <h2 class="section-head" style="margin:0;"><span class="tag">06</span> The wall of voices</h2>
+      <span class="wall-count" id="wallCount">0 submissions</span>
+    </div>
+    <div class="board-bg">
+      <div class="wall" id="wall">
+        <div class="empty-wall"><svg class="icon" width="20" height="20"><use href="#i-eye"/></svg> No voices pinned yet — yours could be the first</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PATTERN FINDER -->
+  <section>
+    <h2 class="section-head"><span class="tag">07</span> <svg class="icon" width="18" height="18"><use href="#i-search"/></svg> Let's find the patterns</h2>
+    <div class="panel">
+      <p style="font-size:14px;color:var(--muted);margin-top:0;">This reads through everyone's notes and pulls out what keeps coming up — handy for briefing the WE-Change team before the trip.</p>
+      <div class="btn-row">
+        <button class="btn-secondary" id="summarizeBtn">Find the common threads</button>
+      </div>
+      <div class="form-row" style="margin-top:16px;">
+        <div class="field" style="flex:1 1 100%;">
+          <label for="askInput">Or ask something specific</label>
+          <input type="text" id="askInput" placeholder="e.g. What are people saying about cities?">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-secondary" id="askBtn">Ask</button>
+      </div>
+      <div class="loader" id="toolLoader"><span class="dot"></span><span class="dot"></span><span class="dot"></span> Reading through the wall…</div>
+      <div class="tool-output" id="toolOutput"></div>
+    </div>
+  </section>
+
+  <footer>
+    Anyone with this link can see what's posted on the wall — so please don't share anything you wouldn't want public. Built for WE-Change Jamaica's trip to the 2026 HLPF. This is not an official UN page.
+  </footer>
+
+</div>
+
+<script>
+const WORD_LIMIT = 100;
+const EMAIL_FOR_LONG_SUBMISSIONS = 'kalifa@wechangeja.com';
+const SUBMISSION_DEADLINE = new Date('2026-07-06T20:00:00-05:00'); // 8pm Jamaica time, same as the meeting
+const MEETING_START_UTC = '20260707T010000Z'; // Jul 6, 8pm Jamaica (UTC-5) = Jul 7, 1am UTC
+const MEETING_END_UTC = '20260707T020000Z';
+
+const SDG_LABELS = {
+  sdg6:'Water', sdg7:'Energy', sdg9:'Infrastructure',
+  sdg11:'Cities', sdg17:'Partnerships', sdgOther:'General'
+};
+const SDG_ICONS = { sdg6:'i-droplet', sdg7:'i-zap', sdg9:'i-building', sdg11:'i-city', sdg17:'i-link' };
+const SDG_EXPLAIN = {
+  sdg6: '<b>SDG 6 — Clean Water &amp; Sanitation.</b> In the context of the HLPF, this is about whether every person — not just some — actually has safe water to drink and a decent toilet, and whether water resources are being managed so they\'re still there for the next generation.',
+  sdg7: '<b>SDG 7 — Affordable &amp; Clean Energy.</b> Here, this means whether power is reliable and affordable for ordinary people, and whether countries are shifting toward energy that doesn\'t damage the planet to produce.',
+  sdg9: '<b>SDG 9 — Industry, Innovation &amp; Infrastructure.</b> This is about the roads, internet, factories and systems a country needs to actually function — built in a way that holds up under shocks (like storms) and doesn\'t leave entire communities out.',
+  sdg11: '<b>SDG 11 — Sustainable Cities &amp; Communities.</b> This means whether towns and cities are safe, affordable, and built with the people who actually live there in mind — not just the people planning decisions get made for.',
+  sdg17: '<b>SDG 17 — Partnerships for the Goals.</b> This is about how governments, organizations and communities work together (and resource each other) to actually deliver on everything else — instead of it staying a promise on paper.'
+};
+const SDG_FACTS = {
+  sdg6: "Across the Caribbean, storms and dry spells can knock out water systems for days at a stretch — making water security a recurring challenge, not a one-off.",
+  sdg7: "Many Caribbean islands import most of their fuel, which is part of why electricity tends to cost more here than in bigger, energy-producing countries.",
+  sdg9: "After a major storm, it's often the roads and bridges in rural communities that take the longest to rebuild — long after the news cameras have moved on.",
+  sdg11: "Kingston has grown faster than the infrastructure meant to support it, which is part of why housing and transport keep coming up in community conversations.",
+  sdg17: "Jamaica works with other Caribbean nations through groups like CARICOM — so what gets said at the HLPF rarely affects just one country."
+};
+
+let submissions = [];
+let signupCount = 0;
+const recentlyAdded = new Map(); // id -> entry, kept until confirmed present from the database
+
+function hashRotation(id){
+  let h = 0;
+  for(let i=0;i<id.length;i++){ h = (h*31 + id.charCodeAt(i)) % 997; }
+  return ((h % 9) - 4);
+}
+
+function countWords(text){
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+// The Firebase SDK loads as a module and may not be ready the instant
+// this script runs, so wait for it if needed.
+function waitForDB(){
+  return new Promise((resolve)=>{
+    if(window.hlpfDBReady){ resolve(); return; }
+    window.addEventListener('hlpfDBReady', ()=>resolve(), {once:true});
+  });
+}
+
+async function fetchFreshData(){
+  await waitForDB();
+  return await window.hlpfDB.getAll();
+}
+
+async function saveSubmission(entry){
+  await waitForDB();
+  await window.hlpfDB.addSubmission(entry);
+}
+
+async function saveSignup(entry){
+  await waitForDB();
+  await window.hlpfDB.addSignup(entry);
+}
+
+async function removeSubmission(id){
+  await waitForDB();
+  await window.hlpfDB.deleteSubmission(id);
+}
+
+// After saving, actually re-check the database a few times to confirm
+// it's really there — rather than just trusting the write succeeded.
+async function verifySubmissionSaved(id, attempts=4, delayMs=1200){
+  for(let i=0;i<attempts;i++){
+    await new Promise(r=>setTimeout(r, delayMs));
+    try{
+      const data = await fetchFreshData();
+      if((data.submissions||[]).some(s=>s.id===id)) return true;
+    }catch(e){ /* try again next loop */ }
+  }
+  return false;
+}
+
+async function verifySignupSaved(beforeCount, attempts=4, delayMs=1200){
+  for(let i=0;i<attempts;i++){
+    await new Promise(r=>setTimeout(r, delayMs));
+    try{
+      const data = await fetchFreshData();
+      const count = Number(data.signupCount) || 0;
+      if(count > beforeCount) return count;
+    }catch(e){}
+  }
+  return null;
+}
+
+async function verifyDeleted(id, attempts=4, delayMs=1200){
+  for(let i=0;i<attempts;i++){
+    await new Promise(r=>setTimeout(r, delayMs));
+    try{
+      const data = await fetchFreshData();
+      if(!(data.submissions||[]).some(s=>s.id===id)) return true;
+    }catch(e){}
+  }
+  return false;
+}
+
+async function loadData(){
+  try{
+    const data = await fetchFreshData();
+    const serverSubmissions = (data.submissions || []).map(s => ({
+      id: s.id,
+      name: s.name,
+      org: s.org,
+      anonymous: (s.anonymous === true || s.anonymous === 'true' || s.anonymous === 'TRUE'),
+      sdg: s.sdg,
+      text: s.text,
+      date: Number(s.date)
+    }));
+
+    // Anything the server now confirms can stop being "pending".
+    const serverIds = new Set(serverSubmissions.map(s => s.id));
+    for(const id of Array.from(recentlyAdded.keys())){
+      if(serverIds.has(id)) recentlyAdded.delete(id);
+    }
+    // Merge: server's confirmed list, plus anything still pending locally
+    // that the server hasn't caught up on yet — so a note never vanishes
+    // just because one background check ran ahead of the sheet.
+    const merged = [...serverSubmissions];
+    for(const entry of recentlyAdded.values()){
+      if(!serverIds.has(entry.id)) merged.push(entry);
+    }
+    submissions = merged;
+    signupCount = Number(data.signupCount) || 0;
+    renderWall();
+    renderSignupCount();
+  }catch(e){
+    // A failed refresh should never erase what's already on screen —
+    // just skip this round and try again next time.
+    console.warn('Could not refresh from the sheet, keeping what was already showing:', e);
+  }
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function renderWall(){
+  const wall = document.getElementById('wall');
+  const count = document.getElementById('wallCount');
+  count.textContent = submissions.length + (submissions.length===1?' submission':' submissions');
+  if(submissions.length===0){
+    wall.innerHTML = '<div class="empty-wall"><svg class="icon" width="20" height="20"><use href="#i-eye"/></svg> No voices pinned yet — yours could be the first</div>';
+    return;
+  }
+  const sorted = [...submissions].sort((a,b)=> b.date - a.date);
+  wall.innerHTML = sorted.map(s => {
+    const rot = hashRotation(s.id);
+    const dateStr = new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+    const name = s.anonymous ? 'Anonymous' : escapeHtml(s.name || 'Anonymous');
+    const sdgVar = 'var(--' + s.sdg + ')';
+    const orgLine = s.org ? `<div class="note-org">${escapeHtml(s.org)}</div>` : '';
+    const iconId = SDG_ICONS[s.sdg] || 'i-sparkle';
+    return `<div class="note" style="transform:rotate(${rot*0.4}deg); border-top-color:${sdgVar}">
+      <span class="note-tag tag-${s.sdg}" style="background:${sdgVar}"><svg class="icon" width="10" height="10"><use href="#${iconId}"/></svg>${SDG_LABELS[s.sdg] || 'General'}</span>
+      <div class="note-text">${escapeHtml(s.text)}</div>
+      ${orgLine}
+      <div class="note-foot">
+        <span>${name} · ${dateStr}</span>
+        <button class="note-del" title="Remove" data-id="${s.id}">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  wall.querySelectorAll('.note-del').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const id = e.target.getAttribute('data-id');
+      if(!confirm('Remove this submission from the wall?')) return;
+      submissions = submissions.filter(s=>s.id!==id);
+      recentlyAdded.delete(id);
+      renderWall();
+      try{
+        await removeSubmission(id);
+        const confirmed = await verifyDeleted(id);
+        if(!confirmed){
+          alert("We're not sure that was removed — please check it directly.");
+        }
+      }catch(err){
+        alert('Could not remove it — it may reappear next time the page loads.');
+      }
+    });
+  });
+}
+
+// ---- Word counter ----
+const textInput = document.getElementById('textInput');
+const wordCounter = document.getElementById('wordCounter');
+textInput.addEventListener('input', ()=>{
+  const n = countWords(textInput.value);
+  wordCounter.textContent = n + ' / ' + WORD_LIMIT + ' words';
+  wordCounter.className = 'word-counter' + (n > WORD_LIMIT ? ' over' : n > WORD_LIMIT*0.8 ? ' warn' : '');
+});
+
+// ---- Submission deadline ----
+function isClosed(){
+  return new Date() >= SUBMISSION_DEADLINE;
+}
+function updateDeadlinePill(){
+  const pill = document.getElementById('deadlinePill');
+  const iconSvg = '<svg class="icon" width="13" height="13"><use href="#i-hourglass"/></svg>';
+  if(isClosed()){
+    pill.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-lock"/></svg> Submissions are closed — thanks to everyone who added their voice!';
+    document.getElementById('submitBtn').disabled = true;
+  } else {
+    const diff = SUBMISSION_DEADLINE - new Date();
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    pill.innerHTML = iconSvg + ' Submissions close <b>July 6, 8:00 PM</b> Jamaica time — ' + days + 'd ' + hours + 'h to go';
+  }
+}
+
+document.getElementById('submitForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const statusEl = document.getElementById('formStatus');
+  const text = textInput.value.trim();
+  if(isClosed()){
+    statusEl.innerHTML = 'Submissions are closed for this round — thank you!';
+    statusEl.className = 'status-msg err';
+    return;
+  }
+  if(!text){
+    statusEl.textContent = 'Add your note before pinning it.';
+    statusEl.className = 'status-msg err';
+    return;
+  }
+  if(!document.getElementById('consentCheck').checked){
+    statusEl.textContent = 'Please check the consent box before submitting.';
+    statusEl.className = 'status-msg err';
+    return;
+  }
+  const wc = countWords(text);
+  if(wc > WORD_LIMIT){
+    const name = document.getElementById('nameInput').value.trim();
+    const org = document.getElementById('orgInput').value.trim();
+    const subject = encodeURIComponent('HLPF 2026 Wall Submission');
+    const body = encodeURIComponent(`Name: ${name || '(not given)'}\nOrganization: ${org || '(not given)'}\n\n${text}`);
+    statusEl.innerHTML = `<svg class="icon" width="13" height="13"><use href="#i-mail"/></svg> That's a bit long for the wall (${wc} words). <a href="mailto:${EMAIL_FOR_LONG_SUBMISSIONS}?subject=${subject}&body=${body}">Email it to Kalifa instead →</a>`;
+    statusEl.className = 'status-msg err';
+    return;
+  }
+  const entry = {
+    id: 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    name: document.getElementById('nameInput').value.trim(),
+    org: document.getElementById('orgInput').value.trim(),
+    anonymous: document.getElementById('anonCheck').checked,
+    sdg: document.getElementById('sdgInput').value,
+    text: text,
+    date: Date.now()
+  };
+  submissions.push(entry);
+  recentlyAdded.set(entry.id, entry);
+  renderWall();
+  statusEl.textContent = 'Saving…';
+  statusEl.className = 'status-msg';
+  try{
+    await saveSubmission({id:entry.id, name:entry.name, org:entry.org, anonymous:entry.anonymous, sdg:entry.sdg, text:entry.text, date:entry.date});
+    const confirmed = await verifySubmissionSaved(entry.id);
+    if(confirmed){
+      statusEl.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-check"/></svg> Pinned to the wall. Thank you for your voice.';
+      statusEl.className = 'status-msg ok';
+      document.getElementById('submitForm').reset();
+      wordCounter.textContent = '0 / ' + WORD_LIMIT + ' words';
+      wordCounter.className = 'word-counter';
+    } else {
+      // Keep it visible (recentlyAdded protects it from being wiped by
+      // the background refresh) but be honest that we couldn't confirm it.
+      statusEl.textContent = "Sent — but we couldn't confirm it saved yet. It'll stay visible here; please check back in a minute, or try again if it's gone.";
+      statusEl.className = 'status-msg err';
+    }
+  }catch(err){
+    submissions = submissions.filter(s => s.id !== entry.id);
+    recentlyAdded.delete(entry.id);
+    renderWall();
+    console.error('Submission failed to save:', err);
+    statusEl.textContent = 'Could not save — please check your connection and try again.';
+    statusEl.className = 'status-msg err';
+  }
+});
+
+// ---- SDG chip explanations ----
+document.querySelectorAll('.sdg-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const key = chip.getAttribute('data-sdg');
+    const explainBox = document.getElementById('sdgExplain');
+    const alreadyActive = chip.classList.contains('active');
+    document.querySelectorAll('.sdg-chip').forEach(c=>c.classList.remove('active'));
+    if(alreadyActive){
+      explainBox.classList.remove('show');
+      return;
+    }
+    chip.classList.add('active');
+    explainBox.innerHTML = SDG_EXPLAIN[key] || '';
+    explainBox.classList.add('show');
+  });
+});
+
+// ---- Spin the wheel ----
+const SDG_ORDER = ['sdg6','sdg7','sdg9','sdg11','sdg17'];
+let wheelRotation = 0;
+document.getElementById('spinBtn').addEventListener('click', ()=>{
+  const spinBtn = document.getElementById('spinBtn');
+  const resultBox = document.getElementById('wheelResult');
+  resultBox.classList.remove('show');
+  spinBtn.disabled = true;
+
+  const idx = Math.floor(Math.random()*5);
+  const segmentCenter = idx*72+36;
+  const landing = (360 - segmentCenter) % 360;
+  const current = ((wheelRotation % 360) + 360) % 360;
+  const extraSpins = 4*360;
+  wheelRotation = wheelRotation - current + extraSpins + landing;
+  document.getElementById('sdgWheel').style.transform = `rotate(${wheelRotation}deg)`;
+
+  setTimeout(()=>{
+    const key = SDG_ORDER[idx];
+    resultBox.innerHTML = SDG_EXPLAIN[key] + `<div class="fact">${SDG_FACTS[key]}</div>` +
+      `<div class="btn-row"><button class="btn-secondary" id="writeAboutBtn" data-sdg="${key}"><svg class="icon" width="13" height="13"><use href="#i-pencil"/></svg> Write about this</button></div>`;
+    resultBox.classList.add('show');
+    document.getElementById('writeAboutBtn').addEventListener('click', (e)=>{
+      const sdgKey = e.currentTarget.getAttribute('data-sdg');
+      document.getElementById('sdgInput').value = sdgKey;
+      document.getElementById('submitForm').scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(()=>textInput.focus(), 400);
+    });
+    spinBtn.disabled = false;
+  }, 3050);
+});
+
+// ---- HLPF countdown (live) ----
+function updateCountdown(){
+  const el = document.getElementById('countdown');
+  const start = new Date('2026-07-07T00:00:00Z');
+  const end = new Date('2026-07-15T23:59:59Z');
+  const now = new Date();
+
+  if(now < start){
+    const diff = start - now;
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    el.innerHTML = '<span class="pulse"></span> <span class="num">' + days + 'd ' + hours + 'h</span> until the HLPF opens in New York';
+  } else if(now >= start && now <= end){
+    el.innerHTML = '<span class="pulse"></span> <span class="num">Happening now</span> — the HLPF is on in New York';
+  } else {
+    el.innerHTML = '<span class="pulse"></span> The 2026 HLPF has wrapped up';
+  }
+}
+
+// ---- Add to calendar ----
+document.getElementById('calendarBtn').addEventListener('click', ()=>{
+  const text = encodeURIComponent("WE-Change JA VNR 2026 Community Consultation");
+  const details = encodeURIComponent("We'll walk through Jamaica's official update to the UN ahead of the 2026 HLPF, and make sure the voices on the Youth Voices wall get carried into the room.\n\nJoin: https://meet.google.com/vic-njkk-bst\nPhone: (US) +1 913-298-1113, PIN: 414 080 123#\nMore numbers: https://tel.meet/vic-njkk-bst?pin=2837431237995");
+  const location = encodeURIComponent('https://meet.google.com/vic-njkk-bst');
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${MEETING_START_UTC}/${MEETING_END_UTC}&details=${details}&location=${location}`;
+  window.open(url, '_blank');
+});
+
+// ---- Meeting signup ----
+function renderSignupCount(){
+  const el = document.getElementById('signupCount');
+  if(signupCount === 0){
+    el.innerHTML = 'Be the first to sign up!';
+  } else {
+    el.innerHTML = `<svg class="icon" width="13" height="13"><use href="#i-userplus"/></svg> ${signupCount} ${signupCount===1?'person is':'people are'} joining so far`;
+  }
+}
+document.getElementById('signupForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const statusEl = document.getElementById('signupStatus');
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  if(!name || !email || !email.includes('@')){
+    statusEl.textContent = 'Add your name and a valid email.';
+    statusEl.className = 'status-msg err';
+    return;
+  }
+  statusEl.textContent = 'Saving…';
+  statusEl.className = 'status-msg';
+  try{
+    await saveSignup({name, email, date: Date.now()});
+    const confirmedCount = await verifySignupSaved(signupCount);
+    if(confirmedCount !== null){
+      signupCount = confirmedCount;
+      renderSignupCount();
+      statusEl.innerHTML = '<svg class="icon" width="13" height="13"><use href="#i-check"/></svg> You\'re on the list — see you there!';
+      statusEl.className = 'status-msg ok';
+      document.getElementById('signupForm').reset();
+    } else {
+      statusEl.textContent = "Sent — but we couldn't confirm it yet. Please check back shortly, or try again if needed.";
+      statusEl.className = 'status-msg err';
+    }
+  }catch(err){
+    statusEl.textContent = 'Could not save — please try again.';
+    statusEl.className = 'status-msg err';
+  }
+});
+
+// ---- Pattern finder ----
+async function askTheWall(prompt){
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1000,
+      messages:[{role:'user', content: prompt}]
+    })
+  });
+  const data = await response.json();
+  const textBlocks = (data.content || []).filter(b=>b.type==='text').map(b=>b.text);
+  return textBlocks.join('\n').trim() || 'No response received.';
+}
+
+function buildSubmissionsContext(){
+  if(submissions.length===0) return '(No submissions have been added yet.)';
+  return submissions.map(s=>{
+    const who = s.anonymous ? 'Anonymous' : (s.name || 'Anonymous');
+    const orgPart = s.org ? ` (${s.org})` : '';
+    return `[${SDG_LABELS[s.sdg] || 'General'}] ${who}${orgPart}: ${s.text}`;
+  }).join('\n\n');
+}
+
+function setLoading(isLoading){
+  document.getElementById('toolLoader').classList.toggle('show', isLoading);
+}
+
+document.getElementById('summarizeBtn').addEventListener('click', async ()=>{
+  const out = document.getElementById('toolOutput');
+  if(submissions.length===0){
+    out.textContent = 'There are no submissions yet.';
+    out.classList.add('show');
+    return;
+  }
+  setLoading(true);
+  out.classList.remove('show');
+  try{
+    const prompt = `You are helping WE-Change Jamaica, a feminist advocacy organization, prepare for the 2026 UN High-Level Political Forum. Below are submissions from young feminists in Jamaica, tagged by topic (water, energy, infrastructure, cities, partnerships, or general).
+
+Summarize in plain, everyday language (no jargon):
+1. What keeps coming up across submissions
+2. Anything notable specific to each topic mentioned (only the ones that come up)
+3. 3-4 simple talking points WE-Change's team could raise at the Forum based on this
+
+Keep it short, organized with simple headers. Do not invent details that aren't in the submissions.
+
+SUBMISSIONS:
+${buildSubmissionsContext()}`;
+    const result = await askTheWall(prompt);
+    out.textContent = result;
+    out.classList.add('show');
+  }catch(err){
+    out.textContent = 'Could not pull this together right now. Please try again in a moment.';
+    out.classList.add('show');
+  }finally{
+    setLoading(false);
+  }
+});
+
+document.getElementById('askBtn').addEventListener('click', async ()=>{
+  const question = document.getElementById('askInput').value.trim();
+  const out = document.getElementById('toolOutput');
+  if(!question){
+    out.textContent = 'Type a question first.';
+    out.classList.add('show');
+    return;
+  }
+  if(submissions.length===0){
+    out.textContent = 'There are no submissions to look through yet.';
+    out.classList.add('show');
+    return;
+  }
+  setLoading(true);
+  out.classList.remove('show');
+  try{
+    const prompt = `You are answering a question about submissions from young feminists in Jamaica, collected ahead of the 2026 UN High-Level Political Forum by WE-Change Jamaica. Only use information present below — say clearly if the submissions don't cover it. Answer in plain, everyday language.
+
+SUBMISSIONS:
+${buildSubmissionsContext()}
+
+QUESTION: ${question}`;
+    const result = await askTheWall(prompt);
+    out.textContent = result;
+    out.classList.add('show');
+  }catch(err){
+    out.textContent = 'Could not get an answer right now. Please try again in a moment.';
+    out.classList.add('show');
+  }finally{
+    setLoading(false);
+  }
+});
+
+updateCountdown();
+updateDeadlinePill();
+setInterval(updateCountdown, 60*1000);
+setInterval(updateDeadlinePill, 60*1000);
+loadData();
+setInterval(loadData, 30*1000); // pick up new submissions from other visitors
+</script>
+
+</body>
+</html>
