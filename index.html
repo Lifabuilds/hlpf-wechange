@@ -5,7 +5,7 @@
 <title>Our Stories for the 2026 HLPF — WE-Change Jamaica</title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAxQk_eMotfgpWbS6nm8acZTQH5BOAxwxc",
@@ -31,12 +31,17 @@
     },
     async addSignup(entry){
       await addDoc(collection(db, 'signups'), entry);
+      await setDoc(doc(db, 'meta', 'signupCount'), { count: increment(1) }, { merge: true });
     },
     async getAll(){
       const snap = await getDocs(collection(db, 'submissions'));
       const submissions = snap.docs.map(d => d.data());
-      const signupsSnap = await getDocs(collection(db, 'signups'));
-      return { submissions, signupCount: signupsSnap.size };
+      let signupCount = 0;
+      try{
+        const countDoc = await getDoc(doc(db, 'meta', 'signupCount'));
+        if(countDoc.exists()) signupCount = Number(countDoc.data().count) || 0;
+      }catch(e){}
+      return { submissions, signupCount };
     }
   };
   window.hlpfDBReady = true;
